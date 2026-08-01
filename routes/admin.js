@@ -24,13 +24,14 @@ async function verifyAdmin(req, res, next) {
 // --- CREATE EVENT ---
 router.post('/events', verifyAdmin, async (req, res) => {
   try {
-    const { title, entryFee, prizePool, maxParticipants } = req.body;
+    const { title, entryFee, prizePool, maxParticipants, gameId } = req.body;
 
     if (!title || entryFee === undefined || !prizePool) {
       return res.status(400).json({ error: 'Title, entry fee, and prize pool are required' });
     }
 
     const newEvent = new Event({
+      gameId: gameId || 'helix_jump',
       title: title.trim(),
       entryFee: parseInt(entryFee),
       prizePool: parseInt(prizePool),

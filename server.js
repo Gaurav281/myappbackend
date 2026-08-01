@@ -37,10 +37,15 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
+const User = require('./models/User');
+
 // Connect to MongoDB Atlas
 mongoose.connect(MONGODB_URI)
-  .then(() => {
+  .then(async () => {
     console.log('Successfully connected to MongoDB Cluster.');
+    
+    // Seed default admin credentials if not present
+    await seedAdminUser();
     
     // Start Server
     app.listen(PORT, () => {
@@ -100,5 +105,28 @@ async function recoverEventCooldownTimers() {
     }
   } catch (err) {
     console.error('Failed to recover event timers:', err);
+  }
+}
+
+async function seedAdminUser() {
+  try {
+    const ADMIN_CREDENTIALS = {
+      name: 'admin',
+      email: 'gg@gmail.com',
+      phone: '8899284567',
+      password: 'Pushpa781@#',
+      isAdmin: true
+    };
+    
+    const adminExists = await User.findOne({ email: ADMIN_CREDENTIALS.email });
+    if (!adminExists) {
+      const newAdmin = new User(ADMIN_CREDENTIALS);
+      await newAdmin.save();
+      console.log('Seeded default admin credentials successfully.');
+    } else {
+      console.log('Admin user already exists in database.');
+    }
+  } catch (err) {
+    console.error('Failed to seed admin credentials:', err.message);
   }
 }
