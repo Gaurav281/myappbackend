@@ -104,4 +104,26 @@ router.get('/profile/:userId', async (req, res) => {
   }
 });
 
+// --- CHANGE PASSWORD ---
+router.post('/change-password', async (req, res) => {
+  try {
+    const { userId, newPassword } = req.body;
+    if (!userId || !newPassword) {
+      return res.status(400).json({ error: 'User ID and new password are required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.password = newPassword; // store plain-text matching as per local flows
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error changing password' });
+  }
+});
+
 module.exports = router;

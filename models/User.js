@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
   },
   coins: {
     type: Number,
-    default: 500, // Welcome bonus
+    default: 0,
   },
   isAdmin: {
     type: Boolean,

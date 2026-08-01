@@ -131,4 +131,43 @@ router.post('/withdrawals/:id/status', verifyAdmin, async (req, res) => {
   }
 });
 
+// --- ADD COINS TO USER ---
+router.post('/users/add-coins', verifyAdmin, async (req, res) => {
+  try {
+    const { identifier, coins } = req.body;
+    if (!identifier || coins === undefined) {
+      return res.status(400).json({ error: 'User identifier and coins amount are required' });
+    }
+
+    const cleanId = identifier.trim().toLowerCase();
+    const user = await User.findOne({
+      $or: [
+        { email: cleanId },
+        { phone: identifier.trim() }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.coins += parseInt(coins);
+    if (user.coins < 0) user.coins = 0;
+    await user.save();
+
+    res.json({
+      message: `Successfully adjusted coins by ${coins} for user ${user.name}`,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        coins: user.coins
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error adjusting user coins' });
+  }
+});
+
 module.exports = router;
